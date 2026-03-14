@@ -10,4 +10,8 @@ class Database():
 
     def connect(self):
         '''Conectando com o banco de dados'''
-        return self.session.connect()
+        try:
+            return self.session.connect()
+        except Exception as erro:
+            print(f"Não foi possível conectar ao Banco de dados\nErro: {erro}")
+            return None

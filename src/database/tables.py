@@ -23,14 +23,14 @@ class Tabela():
         )
 
         self.doacoesItem = Table('doacoesItem', self.metadata,
-            Column('id_doacao', Integer, ForeignKey('doacao.id_doacao'), primary_key=True),
-            Column('id_item', Integer, ForeignKey('itens.id_item'), primary_key=True),
+            Column('id', Integer, ForeignKey('doacoes.id'), primary_key=True),
+            Column('id_item', Integer, ForeignKey('itens.id'), primary_key=True),
             Column('quantidade_utilizada', Integer, nullable=False)
         )
 
             # Usuários
         self.usuarios = Table('usuarios', self.metadata,
-            Column('id', Integer, primary_key=True),
+            Column('id', Integer, primary_key=True, autoincrement=True),
             Column('nome', String(70)),
             Column('email', String(70)),
             Column('senha', String(70)),
@@ -40,20 +40,20 @@ class Tabela():
             Column('tipo_perfil', String(40))
         )
 
-        self.pessoasJuridica = Table('pessoasJuridica', self.metadata,
-            Column('id_usuario', Integer, ForeignKey('usuario.id'), primary_key=True),
-            Column('user_cnpj', String(14), unique=True, nullable=False),
-            Column('razao_social', String(100), nullable=False)
-        )
-
         self.pessoasFisica = Table('pessoaFisica', self.metadata,
             Column('id_usuario', Integer, ForeignKey('usuarios.id'), primary_key=True),
             Column('user_cpf', String(11), unique=True, nullable=False),
             Column('data_nascimento', Date)
         )
 
+        self.pessoasJuridica = Table('pessoasJuridica', self.metadata,
+            Column('id_usuario', Integer, ForeignKey('usuarios.id'), primary_key=True),
+            Column('user_cnpj', String(14), unique=True, nullable=False),
+            Column('razao_social', String(100), nullable=False)
+        )
+
             # Categoria
-        self.itensCategoria = Table('itemCategoria', self.metadata,
+        self.itensCategoria = Table('itensCategoria', self.metadata,
             Column('id', Integer, primary_key=True, autoincrement=True),
             Column('nome_categoria', String(50), unique=True, nullable=False)
         )
@@ -61,17 +61,17 @@ class Tabela():
             # Itens
         self.itens = Table('itens', self.metadata,
             Column('id', Integer, primary_key=True, autoincrement=True),
-            Column('id_categoria', Integer, ForeignKey('itemCategoria.id')),
+            Column('id_categoria', Integer, ForeignKey('itensCategoria.id')),
             Column('descricao', String(255)),
             Column('unidade_medida', String(50))
-        )
+        ) #Doacao
 
             # Distribuição
-        self.distribuicoes = Table('distribuicao', self.metadata,
+        self.distribuicoes = Table('distribuicoes', self.metadata,
             Column('id', Integer, primary_key=True, autoincrement=True),
-            Column('id_pedido', Integer, ForeignKey('pedidoAuxilio.id')),
+            Column('id_pedido', Integer, ForeignKey('pedidosAuxilio.id')),
             Column('id_doacao', Integer, ForeignKey('doacoes.id')),
-            Column('user_cnpj', String(14), ForeignKey('pessoaJuridica.user_cnpj')),
+            Column('user_cnpj', String(14), ForeignKey('pessoasJuridica.user_cnpj')),
             Column('data_entrega', Date, nullable=False),
             Column('validacao_recebimento', Boolean, default=False)
         )
@@ -79,14 +79,14 @@ class Tabela():
         self.distribuicoesItem = Table('distribuicoesItem', self.metadata,
             Column('id', Integer, ForeignKey('distribuicoes.id'), primary_key=True),
             Column('id_item', Integer, ForeignKey('itens.id'), primary_key=True),
-            Column('user_cnpj', String(14), ForeignKey('pessoaJuridica.user_cnpj')),
+            Column('user_cnpj', String(14), ForeignKey('pessoasJuridica.user_cnpj')),
             Column('quantidade_utlizada', Integer, nullable=False)
         )
 
         self.rastreios = Table('rastreios', self.metadata,
             Column('id', Integer, primary_key=True, autoincrement=True),
             Column('id_doacao', Integer, ForeignKey('doacoes.id'), nullable=False),
-            Column('data_hora', date, nullable=False),
+            Column('data_hora', Date, nullable=False),
             Column('etapa', String(100)),
             Column('localizacao', String(100))
         )   
