@@ -7,7 +7,7 @@ from sqlalchemy import text
 db = Database()
 tb = Tabela()
 
-class Repo_doacao(Repo):
+class RepoDoacao(Repo):
     '''
     Classe que interaje com o Banco de Dados das doações
     '''
