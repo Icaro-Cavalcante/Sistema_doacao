@@ -22,10 +22,10 @@ class RepoItens(Repo):
         conexao = self.database.connect()
         if conexao:
             try:
-                query = text (""" INSERT INTO itens (id_categoria, descricao, unidade_medida)
-                              VALUES (:id_categoria, :descricao, :unidade_medida)
+                query = text (""" INSERT INTO itens (id_categoria_item, nome, descricao, unidade_medida)
+                              VALUES (:id_categoria_item, :nome, :descricao, :unidade_medida)
                               ON CONFLICT (id) DO NOTHING""")
-                conexao.execute(query, {"id_categoria" : item.id_categoria, "descricao" : item.descricao, "unidade_medida" : item.unidade_medida})
+                conexao.execute(query, {"id_categoria_item" : item.id_categoria_item, "nome" : item.nome, "descricao" : item.descricao, "unidade_medida" : item.unidade_medida})
                 conexao.commit()
                 conexao.close()
             except Exception as erro: # Tratamento de erro

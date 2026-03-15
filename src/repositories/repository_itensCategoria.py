@@ -1,5 +1,5 @@
 from src.repositories.repository import Repo
-# from src.domain. import Rastreio #TODO: Importar corretamente
+from src.domain.itensCategoria import ItemCategoria
 from src.database.database import Database
 from src.database.tables import Tabela
 from sqlalchemy import text # Usamos text para escrever queries
@@ -7,40 +7,37 @@ from sqlalchemy import text # Usamos text para escrever queries
 db = Database()
 tb = Tabela()
 
-class RepoX(Repo):
-    """
-    """
+class RepoItemCategoria(Repo):
+    '''
+    Classe que interaje com o Banco de Dados das categorias de itens
+    '''
     def __init__(self, database, table):
-        super().__init__(database, Tabela)
+        super().__init__(database, table)
 
-    def create(self, rastreio): #TODO: Colocar parâmetro correto
-        """
-        """
+    def create(self, item_categoria):
+        '''
+        Recebe um objeto de categoria de item e cadastra ele no banco de dados
+        '''
         conexao = self.database.connect()
         if conexao:
             try: 
-                query = text(""" INSERT INTO x () VALUES () ON CONFLICT (id) DO NOTHING """)
+                query = text(""" INSERT INTO itensCategoria (nome_categoria, descricao) VALUES (:nome_categoria, :descricao) ON CONFLICT (id) DO NOTHING """)
 
-                conexao.execute(query, {})
+                conexao.execute(query, {"nome_categoria": item_categoria.nome_categoria, "descricao": item_categoria.descricao})
 
                 conexao.commit()
                 conexao.close()
             except Exception as erro:
-                print(f"")
-            return ""
+                print(f"Não foi possível realizar o cadastro.")
+            return "Categoria de item cadastrada"
         else:
-            return ""
+            return "Não foi possível conectar"
     
-    def read(self, doacao_id):
+    def read(self, id):
         pass
 
-    def update(self, doacao_id):
+    def update(self, id):
         pass
 
     def inactivate(self):
         pass
-
-    # self.itensCategoria = Table('itensCategoria', self.metadata,
-    #         Column('id', Integer, primary_key=True, autoincrement=True),
-    #         Column('nome_categoria', String(50), unique=True, nullable=False)
-    #     )

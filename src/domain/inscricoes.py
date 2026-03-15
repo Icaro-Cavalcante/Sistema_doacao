@@ -2,10 +2,9 @@ class Inscricao():
     '''
     Classe que representa uma inscrição em uma vaga de voluntariado.
     '''
-    def __init__(self, id_vaga, id_usuario, data_inscricao, status, checkin_presenca, id=None):
+    def __init__(self, id_vaga, id_usuario, status, data_inscricao, id=None):
         self.id_vaga = id_vaga
         self.id_usuario = id_usuario
-        self.data_inscricao = data_inscricao
         self.status = status
-        self.checkin_presenca = checkin_presenca
+        self.data_inscricao = data_inscricao
         self.id = id  

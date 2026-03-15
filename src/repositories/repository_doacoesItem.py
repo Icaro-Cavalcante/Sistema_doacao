@@ -21,10 +21,10 @@ class RepoDoacoesItem(Repo): # Importando da classe pai para polimorfismo
         conexao = self.database.connect() # Estabelecendo a conexão
         if conexao: # Se a conexão existir
             try: # Tratamento de erro
-                query = text ("""INSERT INTO doacoesItem (id_item, quantidade_utilizada)
-                            VALUES (:id_item, :quantidade_utilizada)
+                query = text ("""INSERT INTO doacoesItem (id_doacao, id_item, quantidade_utilizada)
+                            VALUES (:id_doacao, :id_item, :quantidade_utilizada)
                             ON CONFLICT (id) DO NOTHING""") # Escreve a query
-                conexao.execute(query, {"id_item" : doacao_item.id_item, "quantidade_utilizada" : doacao_item.quantidade_utilizada}) #Executa a query
+                conexao.execute(query, {"id_doacao" : doacao_item.id_doacao, "id_item" : doacao_item.id_item, "quantidade_utilizada" : doacao_item.quantidade_utilizada}) #Executa a query
                 conexao.commit() # Salva as alterações no banco de dados
                 conexao.close() # Fecha a conexão
             except Exception as erro: # Tratamento de erro

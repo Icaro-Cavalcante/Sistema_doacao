@@ -21,10 +21,10 @@ class RepoUsuario(Repo): # Importando da classe pai para polimorfismo
         conexao = self.database.connect() # Estabelecendo a conexão
         if conexao: # Se a conexão existir
             try: # Tratamento de erro
-                query = text ("""INSERT INTO usuarios (nome, email, senha, endereco, status, identificador, tipo_perfil)
-                            VALUES (:nome, :email, :senha, :endereco, :status, :identificador, :tipo_perfil)
+                query = text ("""INSERT INTO usuarios (nome, email, senha, login, data_cadastro)
+                            VALUES (:nome, :email, :senha, :login, :data_cadastro)
                             ON CONFLICT (id) DO NOTHING""") # Escreve a query
-                conexao.execute(query, {"nome" : usuario.nome, "email" : usuario.email, "senha" : usuario.senha, "endereco" : usuario.endereco, "status" : usuario.status, "identificador" : usuario.identificador, "tipo_perfil" : usuario.tipo_perfil}) #Executa a query
+                conexao.execute(query, {"nome" : usuario.nome, "email" : usuario.email, "senha" : usuario.senha, "login" : usuario.login, "data_cadastro" : usuario.data_cadastro}) #Executa a query
                 conexao.commit() # Salva as alterações no banco de dados
                 conexao.close() # Fecha a conexão
             except Exception as erro: # Tratamento de erro

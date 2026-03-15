@@ -15,13 +15,14 @@ class RepoRastreio(Repo):
 
     def create(self, rastreio):
         """
+        Recebe um objeto de rastreio e cadastra ele no banco de dados
         """
         conexao = self.database.connect()
         if conexao:
             try: 
-                query = text(""" INSERT INTO rastreio (id_doacao, data_hora, etapa, localizacao) VALUES (:id_doacao, :data_hora, :etapa, :localizaca) ON CONFLICT (id) DO NOTHING""")
+                query = text(""" INSERT INTO rastreios (id_doacao_item, data_movimentacao, tipo_movimentacao, localizacao) VALUES (:id_doacao_item, :data_movimentacao, :tipo_movimentacao, :localizacao) ON CONFLICT (id) DO NOTHING""")
 
-                conexao.execute(query, {"id_doacao": rastreio.id_doacao, "data_hora": rastreio.data_hora, "etapa": rastreio.etapa, "localizaca": rastreio.localizacao})
+                conexao.execute(query, {"id_doacao_item": rastreio.id_doacao_item, "data_movimentacao": rastreio.data_movimentacao, "tipo_movimentacao": rastreio.tipo_movimentacao, "localizacao": rastreio.localizacao})
 
                 conexao.commit()
                 conexao.close()

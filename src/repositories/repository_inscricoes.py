@@ -19,13 +19,12 @@ class RepoInscricoes(Repo): # Importando da classe pai para polimorfismo
         Recebe um objeto de inscrição e cadastra ele no banco de dados
         '''
         conexao = self.database.connect() # Estabelecendo a conexão
-        conexao = self.database.connect() # Estabelecendo a conexão
         if conexao: # Se a conexão existir
             try: # Tratamento de erro
-                query = text ("""INSERT INTO inscricoes (id_vaga, id_usuario, data_inscricao, status, checkin_presenca)
-                            VALUES (:id_vaga, :id_usuario, :data_inscricao, :status, :checkin_presenca)
+                query = text ("""INSERT INTO inscricoes (id_vaga, id_usuario, status, data_inscricao)
+                            VALUES (:id_vaga, :id_usuario, :status, :data_inscricao)
                             ON CONFLICT (id) DO NOTHING""") # Escreve a query
-                conexao.execute(query, {"id_vaga" : inscricao.id_vaga, "id_usuario" : inscricao.id_usuario, "data_inscricao" : inscricao.data_inscricao, "status" : inscricao.status, "checkin_presenca" : inscricao.checkin_presenca}) #Executa a query
+                conexao.execute(query, {"id_vaga" : inscricao.id_vaga, "id_usuario" : inscricao.id_usuario, "status" : inscricao.status, "data_inscricao" : inscricao.data_inscricao}) #Executa a query
                 conexao.commit() # Salva as alterações no banco de dados
                 conexao.close() # Fecha a conexão
             except Exception as erro: # Tratamento de erro

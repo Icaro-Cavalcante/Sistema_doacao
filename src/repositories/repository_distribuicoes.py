@@ -19,13 +19,12 @@ class RepoDistribuicao(Repo): # Importando da classe pai para polimorfismo
         Recebe um objeto de distribuição e cadastra ele no banco de dados
         '''
         conexao = self.database.connect() # Estabelecendo a conexão
-        conexao = self.database.connect() # Estabelecendo a conexão
         if conexao: # Se a conexão existir
             try: # Tratamento de erro
-                query = text ("""INSERT INTO distribuicoes (id_pedido, id_doacao, user_cnpj, data_entrega, validacao_recebimento)
-                            VALUES (:id_pedido, :id_doacao, :user_cnpj, :data_entrega, :validacao_recebimento)
+                query = text ("""INSERT INTO distribuicoes (id_pedido_auxilio, data_distribuicao, status)
+                            VALUES (:id_pedido_auxilio, :data_distribuicao, :status)
                             ON CONFLICT (id) DO NOTHING""") # Escreve a query
-                conexao.execute(query, {"id_pedido" : distribuicao.id_pedido, "id_doacao" : distribuicao.id_doacao, "user_cnpj" : distribuicao.user_cnpj, "data_entrega" : distribuicao.data_entrega, "validacao_recebimento" : distribuicao.validacao_recebimento}) #Executa a query
+                conexao.execute(query, {"id_pedido_auxilio" : distribuicao.id_pedido_auxilio, "data_distribuicao" : distribuicao.data_distribuicao, "status" : distribuicao.status}) #Executa a query
                 conexao.commit() # Salva as alterações no banco de dados
                 conexao.close() # Fecha a conexão
             except Exception as erro: # Tratamento de erro

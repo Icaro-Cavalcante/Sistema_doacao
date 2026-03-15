@@ -21,11 +21,11 @@ class RepoDoacao(Repo):
         conexao = self.database.connect()
         if conexao:
             try:
-                query = text ("""INSERT INTO doacoes (id_usuario, data_doacao, motivo_recusa, status_atual)
-                            VALUES (:id_usuario, :data_doacao, :motivo_recusa, :status_atual)
+                query = text ("""INSERT INTO doacoes (id_usuario, data_doacao, descricao, status_doacao)
+                            VALUES (:id_usuario, :data_doacao, :descricao, :status_doacao)
                             ON CONFLICT (id) DO NOTHING""")
                 
-                conexao.execute(query, {"id_usuario" : doacao.id_usuario, "data_doacao" : doacao.data_doacao, "motivo_recusa" : doacao.motivo_recusa, "status_atual" : doacao.status_atual})
+                conexao.execute(query, {"id_usuario" : doacao.id_usuario, "data_doacao" : doacao.data_doacao, "descricao" : doacao.descricao, "status_doacao" : doacao.status_doacao})
 
                 conexao.commit()
                 conexao.close()

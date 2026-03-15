@@ -35,7 +35,7 @@ class Tabela():
             Column('nome', String(70)),
             Column('email', String(70), unique=True),
             Column('senha', String(70)),
-            Column('login', String(70)),
+            Column('login', String(70), unique=True),
             Column('data_cadastro', String(40)),
         )
 

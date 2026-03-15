@@ -1,5 +1,5 @@
 from src.repositories.repository import Repo
-# from src.domain. import Rastreio #TODO: Importar corretamente
+from src.domain.vagasVoluntariado import VagaVoluntariado
 from src.database.database import Database
 from src.database.tables import Tabela
 from sqlalchemy import text # Usamos text para escrever queries
@@ -7,44 +7,37 @@ from sqlalchemy import text # Usamos text para escrever queries
 db = Database()
 tb = Tabela()
 
-class RepoX(Repo):
-    """
-    """
+class RepoVagaVoluntariado(Repo):
+    '''
+    Classe que interaje com o Banco de Dados das vagas de voluntariado
+    '''
     def __init__(self, database, table):
-        super().__init__(database, Tabela)
+        super().__init__(database, table)
 
-    def create(self, rastreio): #TODO: Colocar parâmetro correto
-        """
-        """
+    def create(self, vaga_voluntariado):
+        '''
+        Recebe um objeto de vaga de voluntariado e cadastra ele no banco de dados
+        '''
         conexao = self.database.connect()
         if conexao:
             try: 
-                query = text(""" INSERT INTO x () VALUES () ON CONFLICT (id) DO NOTHING """)
+                query = text(""" INSERT INTO vagasVoluntario (id_usuario, titulo, descricao, data_inicio, data_fim, carga_horaria, quantidade_vagas) VALUES (:id_usuario, :titulo, :descricao, :data_inicio, :data_fim, :carga_horaria, :quantidade_vagas) ON CONFLICT (id) DO NOTHING """)
 
-                conexao.execute(query, {})
+                conexao.execute(query, {"id_usuario": vaga_voluntariado.id_usuario, "titulo": vaga_voluntariado.titulo, "descricao": vaga_voluntariado.descricao, "data_inicio": vaga_voluntariado.data_inicio, "data_fim": vaga_voluntariado.data_fim, "carga_horaria": vaga_voluntariado.carga_horaria, "quantidade_vagas": vaga_voluntariado.quantidade_vagas})
 
                 conexao.commit()
                 conexao.close()
             except Exception as erro:
-                print(f"")
-            return ""
+                print(f"Não foi possível realizar o cadastro.")
+            return "Vaga de voluntariado cadastrada"
         else:
-            return ""
+            return "Não foi possível conectar"
     
-    def read(self, doacao_id):
+    def read(self, id):
         pass
 
-    def update(self, doacao_id):
+    def update(self, id):
         pass
 
     def inactivate(self):
         pass
-
-    # self.vagasVoluntario = Table('vagasVoluntario', self.metadata,
-    #         Column('id', Integer, primary_key=True, autoincrement=True),
-    #         Column('id_usuario', Integer, ForeignKey('usuarios.id'), nullable=False),
-    #         Column('data_evento', Date, nullable=False),
-    #         Column('carga_horaria', String(50)),
-    #         Column('titulo', String(100), nullable=False),
-    #         Column('descricao', String(500), nullable=False)
-    #     )
