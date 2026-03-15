@@ -1,5 +1,5 @@
 from src.repositories.repository import Repo
-from src.domain.rastreio import Rastreio
+from src.domain.rastreios import Rastreio
 from src.database.database import Database
 from src.database.tables import Tabela
 from sqlalchemy import text # Usamos text para escrever queries

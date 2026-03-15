@@ -17,7 +17,3 @@ class Repo(ABC):
     @abstractmethod
     def update(self):
         pass
-
-    @abstractmethod
-    def inactivate(self):
-        pass
