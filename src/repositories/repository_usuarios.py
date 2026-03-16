@@ -51,7 +51,7 @@ class RepoUsuario(Repo): # Importando da classe pai para polimorfismo
                     print("Dados não encontrados.")
                     raise FileNotFoundError # Tratamento de erro
                 else:
-                    usuario_objeto = Usuario(tupla[5], tupla[1], tupla[2], tupla[3], tupla[4], tupla[0]) # Transformando a tupla em objeto
+                    usuario_objeto = Usuario(tupla[1], tupla[2], tupla[3], tupla[4], tupla[5], tupla[0]) # Transformando a tupla em objeto
             except Exception as erro: # Tratamento de erro
                 print(f"Não foi possível realizar a consulta.")
                 return None
@@ -63,7 +63,7 @@ class RepoUsuario(Repo): # Importando da classe pai para polimorfismo
         '''
         Recebe o ID de um usuário, o nome do atributo e o atributo atualizado e atualiza o atributo
         '''
-        conexao = self.database.conectar() # Estabelecendo a conexão
+        conexao = self.database.connect() # Estabelecendo a conexão
         if conexao: # Se a conexão existir
             try:
                 query = text (f'''UPDATE usuarios

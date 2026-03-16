@@ -50,7 +50,7 @@ class RepoDoacao(Repo):
                     print("Dados não encontrados.")
                     raise FileNotFoundError # Tratamento de erro
                 else:
-                    usuario_objeto = Doacao(tupla[4], tupla[1], tupla[2], tupla[3], tupla[0]) # Transformando a tupla em objeto
+                    usuario_objeto = Doacao(tupla[1], tupla[2], tupla[3], tupla[4], tupla[0]) # Transformando a tupla em objeto
             except Exception as erro: # Tratamento de erro
                 print(f"Não foi possível realizar a consulta.")
                 return None
@@ -62,7 +62,7 @@ class RepoDoacao(Repo):
         '''
         Recebe o ID de uma doação, o nome do atributo e o atributo atualizado e atualiza o atributo
         '''
-        conexao = self.database.conectar() # Estabelecendo a conexão
+        conexao = self.database.connect() # Estabelecendo a conexão
         if conexao: # Se a conexão existir
             try:
                 query = text (f'''UPDATE doacoes

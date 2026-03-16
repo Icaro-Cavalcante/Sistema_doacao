@@ -21,7 +21,7 @@ class RepoItemCategoria(Repo):
         conexao = self.database.connect()
         if conexao:
             try: 
-                query = text(""" INSERT INTO itensCategoria (nome_categoria, descricao) VALUES (:nome_categoria, :descricao) ON CONFLICT (id) DO NOTHING """)
+                query = text(""" INSERT INTO itens_categoria (nome_categoria, descricao) VALUES (:nome_categoria, :descricao) ON CONFLICT (id) DO NOTHING """)
 
                 conexao.execute(query, {"nome_categoria": item_categoria.nome_categoria, "descricao": item_categoria.descricao})
 
@@ -34,10 +34,48 @@ class RepoItemCategoria(Repo):
             return "Não foi possível conectar"
     
     def read(self, id):
-        pass
+        '''
+        Recebe o ID de uma categoria de item e retorna um objeto com seus dados
+        '''
+        conexao = self.database.connect() # Estabelecendo conexão
+        if conexao: # Se a conexão existir
+            try: # Tratamento de erro
+                query = text ("""SELECT * FROM itens_categoria WHERE id = :id""") # Query - Pegando os dados da categoria com esse ID
+                tupla = conexao.execute(query, {"id" : id}).first() # Executando a query e pegando o resultado
+                if not tupla: # Se a tupla não for encontrada
+                    print("Dados não encontrados.")
+                    raise FileNotFoundError # Tratamento de erro
+                else:
+                    item_categoria_objeto = ItemCategoria(tupla[1], tupla[2], tupla[0]) # Transformando a tupla em objeto
+            except Exception as erro: # Tratamento de erro
+                print(f"Não foi possível realizar a consulta.")
+                return None
+            return item_categoria_objeto
+        else: # A conexão não existiu
+            return "Não foi possível conectar"
 
-    def update(self, id):
-        pass
+    def update(self, id, nome_atributo, atributo_update):
+        '''
+        Recebe o ID de uma categoria de item, o nome do atributo e o atributo atualizado e atualiza o atributo
+        '''
+        conexao = self.database.connect() # Estabelecendo a conexão
+        if conexao: # Se a conexão existir
+            try:
+                query = text (f'''UPDATE itens_categoria
+                        SET {nome_atributo} = :atributo_update
+                        WHERE id = :id''') # query
+                conexao.execute (query, 
+                                 {
+                                "atributo_update": atributo_update,
+                                "id": id })
+                conexao.commit()
+                conexao.close()
+                return "Atributo atualizado"
+            except Exception as erro: # Tratamento de erro
+                print(f"Não foi possível realizar a consulta.")
+                return None
+        else:
+            return "Não foi possível conectar"
 
     def inactivate(self):
         pass

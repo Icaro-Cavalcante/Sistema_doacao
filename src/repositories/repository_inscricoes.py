@@ -35,10 +35,48 @@ class RepoInscricoes(Repo): # Importando da classe pai para polimorfismo
 
         
     def read(self, id):
-        pass
+        '''
+        Recebe o ID de uma inscrição e retorna um objeto com seus dados
+        '''
+        conexao = self.database.connect() # Estabelecendo conexão
+        if conexao: # Se a conexão existir
+            try: # Tratamento de erro
+                query = text ("""SELECT * FROM inscricoes WHERE id = :id""") # Query - Pegando os dados da inscrição com esse ID
+                tupla = conexao.execute(query, {"id" : id}).first() # Executando a query e pegando o resultado
+                if not tupla: # Se a tupla não for encontrada
+                    print("Dados não encontrados.")
+                    raise FileNotFoundError # Tratamento de erro
+                else:
+                    inscricao_objeto = Inscricao(tupla[1], tupla[2], tupla[3], tupla[4], tupla[0]) # Transformando a tupla em objeto
+            except Exception as erro: # Tratamento de erro
+                print(f"Não foi possível realizar a consulta.")
+                return None
+            return inscricao_objeto
+        else: # A conexão não existiu
+            return "Não foi possível conectar"
 
-    def update(self, id):
-        pass
+    def update(self, id, nome_atributo, atributo_update):
+        '''
+        Recebe o ID de uma inscrição, o nome do atributo e o atributo atualizado e atualiza o atributo
+        '''
+        conexao = self.database.connect() # Estabelecendo a conexão
+        if conexao: # Se a conexão existir
+            try:
+                query = text (f'''UPDATE inscricoes
+                        SET {nome_atributo} = :atributo_update
+                        WHERE id = :id''') # query
+                conexao.execute (query, 
+                                 {
+                                "atributo_update": atributo_update,
+                                "id": id })
+                conexao.commit()
+                conexao.close()
+                return "Atributo atualizado"
+            except Exception as erro: # Tratamento de erro
+                print(f"Não foi possível realizar a consulta.")
+                return None
+        else:
+            return "Não foi possível conectar"
 
     def inactivate(self):
         pass
