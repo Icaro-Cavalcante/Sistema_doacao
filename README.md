@@ -129,10 +129,3 @@ python3 main.py
 
 *Nota: O `main.py` atual contém apenas a criação das tabelas e a inicialização dos repositórios, além de algumas instâncias de teste. Para uma aplicação completa, seria necessário adicionar a lógica de interface (CLI, Web, etc.) e a interação com os repositórios.* 
 
-## Contribuição
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir *issues* ou enviar *pull requests* com melhorias, correções de bugs ou novas funcionalidades.
-
-## Licença
-
-Este projeto está licenciado sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes. (Assumindo licença MIT, se houver um arquivo LICENSE diferente, por favor, ajuste.)
