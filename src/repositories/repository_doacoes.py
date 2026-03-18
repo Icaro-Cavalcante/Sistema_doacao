@@ -14,6 +14,31 @@ class RepoDoacao(Repo):
     def __init__(self, database, table):
         super().__init__(database, table)
 
+    def get_all(self):
+        '''
+        Retorna uma lista com todas as doações cadastradas no banco de dados.
+        '''
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("SELECT * FROM doacoes")
+                resultados = conexao.execute(query).fetchall()
+                
+                lista_doacoes = []
+                for tupla in resultados:
+                    doacao_obj = Doacao(tupla[1], tupla[2], tupla[3], tupla[4], tupla[0])
+                    lista_doacoes.append(doacao_obj)
+                    
+                return lista_doacoes
+            except Exception as erro:
+                print(f"Não foi possível realizar a consulta get_all: {erro}")
+                return []
+            finally:
+                conexao.close()
+        else:
+            print("Não foi possível conectar")
+            return []
+
     def create(self, doacao):
         '''
         Recebe um objeto de doação e cadastra ele no banco de dados

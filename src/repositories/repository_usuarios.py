@@ -14,6 +14,35 @@ class RepoUsuario(Repo): # Importando da classe pai para polimorfismo
     def __init__(self, database, table):
         super().__init__(database, table)
 
+    def read_by_login(self, login: str):
+        '''
+        Busca um utilizador na base de dados através do seu login (username).
+        '''
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                # Procura o utilizador onde a coluna login corresponde ao que foi digitado
+                query = text("SELECT * FROM usuarios WHERE login = :login")
+                tupla = conexao.execute(query, {"login": login}).first()
+                
+                if tupla:
+                    # O banco retorna (id, nome, email, senha, login, data_cadastro)
+                    # Vamos instanciar o objeto passando os atributos de forma explícita
+                    return Usuario(
+                        nome=tupla[1], 
+                        email=tupla[2], 
+                        senha=tupla[3], 
+                        login=tupla[4], 
+                        data_cadastro=tupla[5]
+                    )
+                return None
+            except Exception as erro:
+                print(f"Erro ao procurar utilizador por login: {erro}")
+                return None
+            finally:
+                conexao.close()
+        return None
+
     def create(self, usuario):
         '''
         Recebe um objeto de usuário e cadastra ele no banco de dados

@@ -79,23 +79,32 @@ export function openNovaDoacaoModal() {
     createModal('Registrar Nova Doação', content, 'window.salvarNovaDoacao');
 }
 
-export function salvarNovaDoacao(form) {
+export async function salvarNovaDoacao(form) {
     const inputs = form.querySelectorAll('input');
-    const select = form.querySelector('select');
+    const selects = form.querySelectorAll('select');
     
-    const novaDoacao = {
-        id: "DOA-" + Math.floor(Math.random() * 1000).toString().padStart(3, '0'),
-        doador: inputs[0].value,
-        telefone: inputs[1].value || "Não informado",
-        categoria: select.value,
-        status: "Recebido",
-        data: new Date().toISOString().split('T')[0]
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'A guardar...';
+    submitBtn.disabled = true;
+
+    const payload = {
+        id_usuario: 1,
+        descricao: inputs[0].value,
+        status_doacao: "Recebida",
+        data_doacao: new Date().toISOString().split('T')[0]
     };
-    
-    mockData.doacoes.unshift(novaDoacao);
-    showToast('Doação registada com sucesso!', 'success');
-    form.closest('.fixed').remove();
-    if(window.carregarConteudoGlobal) window.carregarConteudoGlobal();
+
+    try {
+        await api.criarDoacao(payload);
+        window.showToast('Doação guardada com sucesso!', 'success');
+        form.closest('.fixed').remove(); // Fecha o modal
+        if (window.carregarConteudoGlobal) window.carregarConteudoGlobal(); // Recarrega a tabela atualizada
+    } catch (erro) {
+        window.showToast('Falha ao contactar o servidor.', 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
 }
 
 // === BENEFICIÁRIOS ===

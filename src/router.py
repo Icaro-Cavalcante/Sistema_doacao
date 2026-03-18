@@ -1,5 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from datetime import date
+from datetime import date, datetime, timedelta
+
+import jwt
+from pydantic import BaseModel
 
 from src.database.database import Database
 from src.database.tables import Tabela
@@ -55,8 +58,35 @@ repo_dist_item = RepoDistribuicaoItem(db, tb)
 repo_vaga = RepoVagaVoluntariado(db, tb)
 repo_inscricao = RepoInscricoes(db, tb)
 
+SECRET_KEY = "chave_secreta"
+ALGORITHM = "HS256"
 
-# 1. USUÁRIOS E PERFIS
+class LoginRequest(BaseModel):
+    login: str
+    senha: str
+
+@router.post("/login/", tags=["0. Autenticação"])
+def fazer_login(dados_login: LoginRequest):
+    usuario = repo_usuario.read_by_login(dados_login.login)
+    
+    if not usuario or usuario.senha != dados_login.senha:
+        raise HTTPException(status_code=401, detail="Login ou senha incorretos")
+
+    dados_token = {
+        "sub": usuario.login, 
+        "exp": datetime.utcnow() + timedelta(hours=2)
+    }
+    
+    token = jwt.encode(dados_token, SECRET_KEY, algorithm=ALGORITHM)
+    
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "usuario": {
+            "nome": usuario.nome,
+            "login": usuario.login
+        }
+    }
 
 @router.post("/usuarios/", status_code=201, tags=["1. Atores - Usuários"])
 def cadastrar_usuario(usuario_in: UsuarioCreate):
