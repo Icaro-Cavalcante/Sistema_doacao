@@ -15,15 +15,16 @@ export function renderSidebar() {
     sidebarMenu.innerHTML = menuItems.map(item => {
         const isActive = state.currentView === item.id;
         
+        // A MAGIA ACONTECE AQUI: Retirámos o "border-r-4" e deixámos apenas um fundo arredondado com uma sombra leve.
         const activeClasses = isActive 
-            ? 'bg-blue-50 text-blue-700 font-semibold border-r-4 border-blue-600' 
-            : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 font-medium border-r-4 border-transparent';
+            ? 'bg-blue-50 text-blue-700 font-bold shadow-sm' 
+            : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600 font-medium';
             
         return `
-            <button class="w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-1 transition-all duration-200 ${activeClasses} center-on-collapse" 
+            <button class="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-1.5 transition-all duration-200 ${activeClasses} center-on-collapse" 
                     onclick="window.mudarView('${item.id}')">
                 <i data-lucide="${item.icon}" class="w-5 h-5 flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-gray-400'}"></i>
-                <span class="text-sm font-medium whitespace-nowrap hide-on-collapse">${item.label}</span>
+                <span class="text-sm whitespace-nowrap hide-on-collapse">${item.label}</span>
             </button>
         `;
     }).join('');
