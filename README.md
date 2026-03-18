@@ -76,7 +76,7 @@ Sistema_doacao-main/
 
 *   **Python 3.x**
 *   **SQLAlchemy**: ORM (Object-Relational Mapper) para interação com o banco de dados.
-*   **SQLite**: Banco de dados padrão para desenvolvimento e testes (configurável para outros SGBDs como PostgreSQL).
+*   **MySQL**: Banco de dados padrão para desenvolvimento e testes (configuramos com o PostgreSql).
 
 ## Configuração e Instalação
 
