@@ -36,7 +36,7 @@ class Tabela():
             Column('email', String(70), unique=True),
             Column('senha', String(70)),
             Column('login', String(70), unique=True),
-            Column('data_cadastro', String(40)),
+            Column('data_cadastro', Date),
         )
 
         self.pessoas_fisica = Table('pessoas_fisica', self.metadata,

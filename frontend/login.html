@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Doar+</title>
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E" type="image/svg+xml">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style> * { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 w-full max-w-md animate-fade-in-up">
+        
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center gap-2">
+                <i data-lucide="heart" class="w-8 h-8 text-blue-600 fill-blue-600"></i>
+                <span class="font-bold text-2xl text-gray-800 tracking-tight">Doar+</span>
+            </div>
+        </div>
+
+        <h2 class="text-xl font-semibold text-center text-gray-700 mb-6">Acesse sua conta</h2>
+
+        <div id="error-message" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4 text-center border border-red-100"></div>
+
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Login</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <input type="text" id="login" required placeholder="Seu nome de usuário" class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="lock" class="w-5 h-5 text-gray-400"></i>
+                    </div>
+                    <input type="password" id="senha" required placeholder="••••••••" class="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow">
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2 mt-6">
+                Entrar no Sistema
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { api } from './js/api.js';
+
+        // Inicializa os ícones do Lucide
+        lucide.createIcons();
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('error-message');
+            const login = document.getElementById('login').value;
+            const senha = document.getElementById('senha').value;
+
+            // Reset visual
+            errorDiv.classList.add('hidden');
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Entrando...';
+            loginBtn.disabled = true;
+            lucide.createIcons();
+
+            try {
+                // Faz a requisição para a API
+                const response = await api.login({ login, senha });
+                
+                // Se der sucesso, salva os dados no navegador
+                if(response.access_token) {
+                    localStorage.setItem('access_token', response.access_token);
+                    localStorage.setItem('usuario_nome', response.usuario.nome);
+                    localStorage.setItem('usuario_login', response.usuario.login);
+                    
+                    // Redireciona para o painel principal
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                // Exibe o erro devolvido pelo back-end (ex: "Login ou senha incorretos")
+                errorDiv.textContent = error.message || 'Falha ao conectar ao servidor.';
+                errorDiv.classList.remove('hidden');
+            } finally {
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>

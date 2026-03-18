@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doar+ | Sistema de Gestão de Doações</title>
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E" type="image/svg+xml">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-transition { transition: all 0.3s ease-in-out; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        
+        /* === MAGIA DA RESPONSIVIDADE DO MENU PC === */
+        @media (min-width: 1024px) {
+            body.sidebar-collapsed #sidebar { width: 5rem !important; } 
+            body.sidebar-collapsed #mainContent { margin-left: 5rem !important; }
+            body.sidebar-collapsed .hide-on-collapse { opacity: 0; display: none !important; }
+            body.sidebar-collapsed .center-on-collapse { justify-content: center !important; padding-left: 0; padding-right: 0; }
+            body.sidebar-collapsed #sidebarTopBar { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+        }
+    </style>
+
+    <script>
+        // Se não houver token (mesmo fake) salva no localStorage, manda pro login
+        // Se quiser testar livremente sem login, basta comentar o if abaixo
+        if (!localStorage.getItem('access_token')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body class="bg-gray-50 overflow-x-hidden">
+
+<template id="modal-template">
+    <div class="fixed inset-0 z-50 overflow-y-auto hidden" id="modalOverlay">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" id="modalBackdrop"></div>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" id="modalContent">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center mb-4 border-b pb-3" id="modalHeader">
+                        <h3 class="text-lg font-bold text-gray-900" id="modalTitle"></h3>
+                        <button class="text-gray-400 hover:text-red-500 transition-colors" id="modalCloseBtn">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div id="modalBody"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="toast-template">
+    <div class="fixed top-4 right-4 z-[60] hidden transition-opacity duration-300" id="toast">
+        <div class="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 font-medium" id="toastContent">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+</template>
+
+<div id="sidebarBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-30 hidden lg:hidden transition-opacity"></div>
+
+<aside class="fixed top-0 left-0 h-screen bg-white shadow-lg z-40 w-64 transform -translate-x-full lg:translate-x-0 sidebar-transition flex flex-col" id="sidebar">
+    <div class="flex items-center justify-between h-16 px-4 border-b overflow-hidden transition-all" id="sidebarTopBar">
+        
+        <div class="hidden lg:flex items-center gap-2 flex-shrink-0 transition-all" id="logoContainerPC">
+            <i data-lucide="heart" class="w-8 h-8 text-blue-600 fill-blue-600 flex-shrink-0"></i>
+            <span class="font-bold text-xl text-gray-800 whitespace-nowrap hide-on-collapse">Doar+</span>
+        </div>
+
+        <span class="font-bold text-gray-400 uppercase text-xs tracking-widest lg:hidden mt-1 ml-1">Menu</span>
+
+        <button class="p-1 rounded-lg hover:bg-gray-100 hidden lg:block text-gray-500 flex-shrink-0" id="toggleSidebar">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <button class="p-1 rounded-lg hover:bg-gray-100 lg:hidden text-gray-500 flex-shrink-0" id="closeSidebarMobile">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+    </div>
+    
+    <nav class="p-3 mt-2 flex-grow overflow-y-auto overflow-x-hidden scrollbar-hide" id="sidebarMenu"></nav>
+    
+    <div class="p-3 mt-auto border-t border-gray-100">
+        <button class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 text-gray-700 hover:text-red-600 transition-all duration-200 group center-on-collapse" id="logoutBtn" onclick="localStorage.removeItem('access_token'); window.location.href='login.html'">
+            <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0 text-gray-400 group-hover:text-red-600 transition-colors"></i>
+            <span class="text-sm font-medium whitespace-nowrap hide-on-collapse">Sair da Conta</span>
+        </button>
+    </div>
+</aside>
+
+<div class="flex flex-col min-h-screen ml-0 lg:ml-64 sidebar-transition" id="mainContent">
+    <header class="bg-white border-b sticky top-0 z-20 shadow-sm">
+        <div class="flex items-center justify-between px-4 lg:px-6 py-3 lg:py-4">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <button class="p-1.5 rounded-lg hover:bg-gray-100 lg:hidden text-gray-600 flex-shrink-0" id="mobileMenuBtn">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                
+                <div class="flex flex-col lg:hidden overflow-hidden">
+                    <div class="flex items-center gap-1.5">
+                        <i data-lucide="heart" class="w-5 h-5 text-blue-600 fill-blue-600"></i>
+                        <span class="font-bold text-base text-gray-800 tracking-tight">Doar+</span>
+                    </div>
+                    <h1 class="text-[10px] uppercase tracking-wider font-semibold text-gray-500 truncate max-w-[120px]">
+                        Sistema de Gestão
+                    </h1>
+                </div>
+
+                <h1 class="hidden lg:block text-xl font-bold text-gray-800">Painel de Controle</h1>
+            </div>
+
+            <div class="flex items-center gap-3 lg:gap-5 flex-shrink-0">
+                <div class="hidden sm:flex items-center bg-gray-100 rounded-lg px-3 py-2 border border-gray-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all w-32 md:w-64">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-500 flex-shrink-0"></i>
+                    <input type="text" placeholder="Buscar..." class="bg-transparent border-none focus:outline-none text-sm ml-2 w-full text-gray-700" id="searchInput">
+                </div>
+                
+                <div class="relative" id="notificationContainer">
+                    <button class="relative p-2 rounded-full hover:bg-gray-100 transition-colors" id="notificationBtn">
+                        <i data-lucide="bell" class="w-5 h-5 text-gray-600"></i>
+                        <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full" id="notificationBadge" style="display: none;"></span>
+                    </button>
+                    <div class="absolute right-[-60px] sm:right-0 mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-xl border border-gray-100 py-2 hidden z-50" id="notificationDropdown">
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800">Notificações</h3>
+                        </div>
+                        <div id="notificationList" class="max-h-64 overflow-y-auto"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 cursor-pointer pl-3 lg:pl-4 border-l border-gray-200" id="profileBtn">
+                    <div class="w-8 h-8 lg:w-9 lg:h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-sm text-sm lg:text-base flex-shrink-0">U</div>
+                    <div class="hidden md:block">
+                        <p class="text-sm font-bold text-gray-800 leading-tight truncate w-24">Usuário Logado</p>
+                        <p class="text-xs text-gray-500">Gestor</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="flex-1 p-4 lg:p-8 overflow-x-hidden" id="mainArea"></main>
+</div>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

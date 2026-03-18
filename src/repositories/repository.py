@@ -1,3 +1,4 @@
+# src/repositories/repository.py
 from abc import ABC, abstractmethod
 
 class Repo(ABC):
@@ -16,4 +17,12 @@ class Repo(ABC):
 
     @abstractmethod
     def update(self):
+        pass
+
+    @abstractmethod
+    def delete(self):
+        pass
+
+    @abstractmethod
+    def get_all(self):
         pass

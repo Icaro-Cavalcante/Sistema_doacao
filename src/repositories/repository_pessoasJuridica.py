@@ -1,3 +1,4 @@
+# src/repositories/repository_pessoasJuridica.py
 from src.repositories.repository import Repo
 from src.domain.pessoasJuridica import PessoaJuridica
 from src.database.database import Database
@@ -29,6 +30,7 @@ class RepoPessoaJuridica(Repo):
                 conexao.close()
             except Exception as erro:
                 print(f"Não foi possível realizar o cadastro.")
+                return "Não foi possível realizar o cadastro"
             return "Pessoa jurídica cadastrada"
         else:
             return "Não foi possível conectar"
@@ -40,39 +42,72 @@ class RepoPessoaJuridica(Repo):
         conexao = self.database.connect() # Estabelecendo conexão
         if conexao: # Se a conexão existir
             try: # Tratamento de erro
-                query = text ("""SELECT * FROM pessoas_juridica WHERE id = :id""") # Query - Pegando os dados da pessoa jurídica com esse ID
+                query = text ("""SELECT * FROM pessoas_juridica WHERE id_usuario = :id""") # Query - Pegando os dados da pessoa jurídica com esse ID
                 tupla = conexao.execute(query, {"id" : id}).first() # Executando a query e pegando o resultado
                 if not tupla: # Se a tupla não for encontrada
                     print("Dados não encontrados.")
                     raise FileNotFoundError # Tratamento de erro
                 else:
-                    pessoa_juridica_objeto = PessoaJuridica(tupla[1], tupla[2], tupla[3]) # Transformando a tupla em objeto
+                    pessoa_juridica_objeto = {"id_usuario": tupla[0], "user_cnpj": tupla[1], "razao_social": tupla[2]}
             except Exception as erro: # Tratamento de erro
                 print(f"Não foi possível realizar a consulta.")
-                return None
+                return "Não foi possível realizar a consulta"
             return pessoa_juridica_objeto
         else: # A conexão não existiu
             return "Não foi possível conectar"
 
-    def update(self, id, nome_atributo, atributo_update):
+    def update(self, id, pessoa_juridica):
         '''
-        Recebe o ID de uma pessoa jurídica, o nome do atributo e o atributo atualizado e atualiza o atributo
+        Recebe o ID de uma pessoa jurídica e o objeto atualizado e atualiza no banco
         '''
         conexao = self.database.connect() # Estabelecendo a conexão
         if conexao: # Se a conexão existir
             try:
-                query = text (f'''UPDATE pessoas_juridica
-                        SET {nome_atributo} = :atributo_update
-                        WHERE id = :id''') # query
+                query = text ('''UPDATE pessoas_juridica
+                        SET user_cnpj = :user_cnpj, razao_social = :razao_social
+                        WHERE id_usuario = :id''') # query
                 conexao.execute (query, 
                                  {
-                                "atributo_update": atributo_update,
+                                "user_cnpj": pessoa_juridica.user_cnpj,
+                                "razao_social": pessoa_juridica.razao_social,
                                 "id": id })
                 conexao.commit()
                 conexao.close()
                 return "Atributo atualizado"
             except Exception as erro: # Tratamento de erro
                 print(f"Não foi possível realizar a consulta.")
-                return None
+                return "Não foi possível atualizar"
         else:
             return "Não foi possível conectar"
+
+    def delete(self, id):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("DELETE FROM pessoas_juridica WHERE id_usuario = :id")
+                conexao.execute(query, {"id": id})
+                conexao.commit()
+                conexao.close()
+                return "Pessoa Jurídica deletada"
+            except Exception as erro:
+                print(f"Não foi possível realizar a exclusão.")
+                return "Não foi possível deletar"
+        else:
+            return "Não foi possível conectar"
+
+    def get_all(self):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("SELECT * FROM pessoas_juridica")
+                resultados = conexao.execute(query).fetchall()
+                return [{"id_usuario": tupla[0], "user_cnpj": tupla[1], "razao_social": tupla[2]} for tupla in resultados]
+            except Exception as erro:
+                print(f"Não foi possível listar.")
+                return []
+            finally:
+                conexao.close()
+        return []
+
+    def inactivate(self):
+        pass

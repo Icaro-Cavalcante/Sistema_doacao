@@ -1,8 +1,9 @@
+# src/repositories/repository_pedidosAuxilio.py
 from src.repositories.repository import Repo
 from src.domain.pedidosAuxilio import PedidoAuxilio
 from src.database.database import Database
 from src.database.tables import Tabela
-from sqlalchemy import text # Usamos text para escrever queries
+from sqlalchemy import text
 
 db = Database()
 tb = Tabela()
@@ -14,68 +15,90 @@ class RepoPedidoAuxilio(Repo):
     def __init__(self, database, table):
         super().__init__(database, table)
 
-    def create(self, pedido_auxilio):
-        '''
-        Recebe um objeto de pedido de auxílio e cadastra ele no banco de dados
-        '''
+    def create(self, pedido):
         conexao = self.database.connect()
         if conexao:
             try: 
-                query = text(""" INSERT INTO pedidos_auxilio (id_usuario, justificativa, data_pedido, status) VALUES (:id_usuario, :justificativa, :data_pedido, :status) ON CONFLICT (id) DO NOTHING """)
-
-                conexao.execute(query, {"id_usuario": pedido_auxilio.id_usuario, "justificativa": pedido_auxilio.justificativa, "data_pedido": pedido_auxilio.data_pedido, "status": pedido_auxilio.status})
-
+                query = text(""" INSERT INTO pedidos_auxilio (id_usuario, justificativa, data_pedido, status) VALUES (:id_usuario, :justificativa, :data_pedido, :status)""")
+                conexao.execute(query, {"id_usuario": pedido.id_usuario, "justificativa": pedido.justificativa, "data_pedido": pedido.data_pedido, "status": pedido.status})
                 conexao.commit()
                 conexao.close()
             except Exception as erro:
                 print(f"Não foi possível realizar o cadastro.")
-            return "Pedido de auxílio cadastrado"
+                return "Não foi possível realizar o cadastro"
+            return "Pedido cadastrado"
         else:
             return "Não foi possível conectar"
     
     def read(self, id):
-        '''
-        Recebe o ID de um pedido de auxílio e retorna um objeto com seus dados
-        '''
-        conexao = self.database.connect() # Estabelecendo conexão
-        if conexao: # Se a conexão existir
-            try: # Tratamento de erro
-                query = text ("""SELECT * FROM pedidos_auxilio WHERE id = :id""") # Query - Pegando os dados do pedido com esse ID
-                tupla = conexao.execute(query, {"id" : id}).first() # Executando a query e pegando o resultado
-                if not tupla: # Se a tupla não for encontrada
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text ("""SELECT * FROM pedidos_auxilio WHERE id = :id""")
+                tupla = conexao.execute(query, {"id" : id}).first()
+                if not tupla:
                     print("Dados não encontrados.")
-                    raise FileNotFoundError # Tratamento de erro
+                    raise FileNotFoundError
                 else:
-                    pedido_auxilio_objeto = PedidoAuxilio(tupla[1], tupla[2], tupla[3], tupla[4], tupla[0]) # Transformando a tupla em objeto
-            except Exception as erro: # Tratamento de erro
+                    pedido_objeto = {"id": tupla[0], "id_usuario": tupla[1], "justificativa": tupla[2], "data_pedido": tupla[3], "status": tupla[4]}
+            except Exception as erro:
                 print(f"Não foi possível realizar a consulta.")
-                return None
-            return pedido_auxilio_objeto
-        else: # A conexão não existiu
+                return "Não foi possível realizar a consulta"
+            return pedido_objeto
+        else:
             return "Não foi possível conectar"
 
-    def update(self, id, nome_atributo, atributo_update):
-        '''
-        Recebe o ID de um pedido de auxílio, o nome do atributo e o atributo atualizado e atualiza o atributo
-        '''
-        conexao = self.database.connect() # Estabelecendo a conexão
-        if conexao: # Se a conexão existir
+    def update(self, id, pedido):
+        conexao = self.database.connect()
+        if conexao:
             try:
-                query = text (f'''UPDATE pedidos_auxilio
-                        SET {nome_atributo} = :atributo_update
-                        WHERE id = :id''') # query
+                query = text ('''UPDATE pedidos_auxilio
+                        SET id_usuario = :id_usuario, justificativa = :justificativa, data_pedido = :data_pedido, status = :status
+                        WHERE id = :id''')
                 conexao.execute (query, 
                                  {
-                                "atributo_update": atributo_update,
+                                "id_usuario": pedido.id_usuario,
+                                "justificativa": pedido.justificativa,
+                                "data_pedido": pedido.data_pedido,
+                                "status": pedido.status,
                                 "id": id })
                 conexao.commit()
                 conexao.close()
                 return "Atributo atualizado"
-            except Exception as erro: # Tratamento de erro
+            except Exception as erro:
                 print(f"Não foi possível realizar a consulta.")
-                return None
+                return "Não foi possível atualizar"
         else:
             return "Não foi possível conectar"
+
+    def delete(self, id):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("DELETE FROM pedidos_auxilio WHERE id = :id")
+                conexao.execute(query, {"id": id})
+                conexao.commit()
+                conexao.close()
+                return "Pedido deletado"
+            except Exception as erro:
+                print(f"Não foi possível realizar a exclusão.")
+                return "Não foi possível deletar"
+        else:
+            return "Não foi possível conectar"
+
+    def get_all(self):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("SELECT * FROM pedidos_auxilio")
+                resultados = conexao.execute(query).fetchall()
+                return [{"id": tupla[0], "id_usuario": tupla[1], "justificativa": tupla[2], "data_pedido": tupla[3], "status": tupla[4]} for tupla in resultados]
+            except Exception as erro:
+                print(f"Não foi possível listar.")
+                return []
+            finally:
+                conexao.close()
+        return []
 
     def inactivate(self):
         pass

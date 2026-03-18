@@ -1,8 +1,9 @@
+# src/repositories/repository_itensCategoria.py
 from src.repositories.repository import Repo
 from src.domain.itensCategoria import ItemCategoria
 from src.database.database import Database
 from src.database.tables import Tabela
-from sqlalchemy import text # Usamos text para escrever queries
+from sqlalchemy import text
 
 db = Database()
 tb = Tabela()
@@ -14,68 +15,88 @@ class RepoItemCategoria(Repo):
     def __init__(self, database, table):
         super().__init__(database, table)
 
-    def create(self, item_categoria):
-        '''
-        Recebe um objeto de categoria de item e cadastra ele no banco de dados
-        '''
+    def create(self, categoria):
         conexao = self.database.connect()
         if conexao:
             try: 
-                query = text(""" INSERT INTO itens_categoria (nome_categoria, descricao) VALUES (:nome_categoria, :descricao) ON CONFLICT (id) DO NOTHING """)
-
-                conexao.execute(query, {"nome_categoria": item_categoria.nome_categoria, "descricao": item_categoria.descricao})
-
+                query = text(""" INSERT INTO itens_categoria (nome_categoria, descricao) VALUES (:nome_categoria, :descricao)""")
+                conexao.execute(query, {"nome_categoria": categoria.nome_categoria, "descricao": categoria.descricao})
                 conexao.commit()
                 conexao.close()
             except Exception as erro:
                 print(f"Não foi possível realizar o cadastro.")
-            return "Categoria de item cadastrada"
+                return "Não foi possível realizar o cadastro"
+            return "Categoria cadastrada"
         else:
             return "Não foi possível conectar"
     
     def read(self, id):
-        '''
-        Recebe o ID de uma categoria de item e retorna um objeto com seus dados
-        '''
-        conexao = self.database.connect() # Estabelecendo conexão
-        if conexao: # Se a conexão existir
-            try: # Tratamento de erro
-                query = text ("""SELECT * FROM itens_categoria WHERE id = :id""") # Query - Pegando os dados da categoria com esse ID
-                tupla = conexao.execute(query, {"id" : id}).first() # Executando a query e pegando o resultado
-                if not tupla: # Se a tupla não for encontrada
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text ("""SELECT * FROM itens_categoria WHERE id = :id""")
+                tupla = conexao.execute(query, {"id" : id}).first()
+                if not tupla:
                     print("Dados não encontrados.")
-                    raise FileNotFoundError # Tratamento de erro
+                    raise FileNotFoundError
                 else:
-                    item_categoria_objeto = ItemCategoria(tupla[1], tupla[2], tupla[0]) # Transformando a tupla em objeto
-            except Exception as erro: # Tratamento de erro
+                    categoria_objeto = {"id": tupla[0], "nome_categoria": tupla[1], "descricao": tupla[2]}
+            except Exception as erro:
                 print(f"Não foi possível realizar a consulta.")
-                return None
-            return item_categoria_objeto
-        else: # A conexão não existiu
+                return "Não foi possível realizar a consulta"
+            return categoria_objeto
+        else:
             return "Não foi possível conectar"
 
-    def update(self, id, nome_atributo, atributo_update):
-        '''
-        Recebe o ID de uma categoria de item, o nome do atributo e o atributo atualizado e atualiza o atributo
-        '''
-        conexao = self.database.connect() # Estabelecendo a conexão
-        if conexao: # Se a conexão existir
+    def update(self, id, categoria):
+        conexao = self.database.connect()
+        if conexao:
             try:
-                query = text (f'''UPDATE itens_categoria
-                        SET {nome_atributo} = :atributo_update
-                        WHERE id = :id''') # query
+                query = text ('''UPDATE itens_categoria
+                        SET nome_categoria = :nome_categoria, descricao = :descricao
+                        WHERE id = :id''')
                 conexao.execute (query, 
                                  {
-                                "atributo_update": atributo_update,
+                                "nome_categoria": categoria.nome_categoria,
+                                "descricao": categoria.descricao,
                                 "id": id })
                 conexao.commit()
                 conexao.close()
                 return "Atributo atualizado"
-            except Exception as erro: # Tratamento de erro
+            except Exception as erro:
                 print(f"Não foi possível realizar a consulta.")
-                return None
+                return "Não foi possível atualizar"
         else:
             return "Não foi possível conectar"
+
+    def delete(self, id):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("DELETE FROM itens_categoria WHERE id = :id")
+                conexao.execute(query, {"id": id})
+                conexao.commit()
+                conexao.close()
+                return "Categoria deletada"
+            except Exception as erro:
+                print(f"Não foi possível realizar a exclusão.")
+                return "Não foi possível deletar"
+        else:
+            return "Não foi possível conectar"
+
+    def get_all(self):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("SELECT * FROM itens_categoria")
+                resultados = conexao.execute(query).fetchall()
+                return [{"id": tupla[0], "nome_categoria": tupla[1], "descricao": tupla[2]} for tupla in resultados]
+            except Exception as erro:
+                print(f"Não foi possível listar.")
+                return []
+            finally:
+                conexao.close()
+        return []
 
     def inactivate(self):
         pass

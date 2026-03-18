@@ -1,116 +1,116 @@
+# src/repositories/repository_doacoesItem.py
 from src.repositories.repository import Repo
 from src.domain.doacoesItem import DoacaoItem
 from src.database.database import Database
 from src.database.tables import Tabela
-from sqlalchemy import text # Usamos text para escrever queries
+from sqlalchemy import text
 
-db = Database() # Objeto do banco de dados
-tb = Tabela() # Objeto da tabela
+db = Database()
+tb = Tabela()
 
-class RepoDoacoesItem(Repo): # Importando da classe pai para polimorfismo
-    '''
-    Classe que interaje com o Banco de Dados dos itens doação
-    '''
+class RepoDoacoesItem(Repo):
     def __init__(self, database, table):
         super().__init__(database, table)
 
     def create(self, doacao_item):
-        '''
-        Recebe um objeto de doação item e cadastra ele no banco de dados
-        '''
-        conexao = self.database.connect() # Estabelecendo a conexão
+        conexao = self.database.connect()
         if conexao:
-            try:
-                query = text("""INSERT INTO doacoes_item (id_doacao, id_item, quantidade_utilizada)
-                            VALUES (:id_doacao, :id_item, :quantidade_utilizada)""")
-                conexao.execute(query, {
-                    "id_doacao": doacao_item.id_doacao, 
-                    "id_item": doacao_item.id_item, 
-                    "quantidade_utilizada": doacao_item.quantidade_utilizada
-                })
+            try: 
+                query = text(""" INSERT INTO doacoes_item (id_doacao, id_item, quantidade_utilizada) VALUES (:id_doacao, :id_item, :quantidade_utilizada)""")
+                conexao.execute(query, {"id_doacao": doacao_item.id_doacao, "id_item": doacao_item.id_item, "quantidade_utilizada": doacao_item.quantidade_utilizada})
                 conexao.commit()
                 conexao.close()
-                return "Item doação cadastrado"
             except Exception as erro:
-                print(f"Erro ao cadastrar item doação: {erro}")
+                print(f"Não foi possível realizar o cadastro.")
                 return "Não foi possível realizar o cadastro"
-        return "Não foi possível conectar"
-
-    def get_items_by_doacao_details(self, id_doacao):
-        """Consulta complexa com JOIN para listar detalhes dos itens de uma doação"""
-        conexao = self.database.connect()
-        if conexao:
-            query = text("""
-                SELECT i.nome, i.descricao, di.quantidade_utilizada, ic.nome_categoria
-                FROM doacoes_item di
-                JOIN itens i ON di.id_item = i.id
-                JOIN itens_categoria ic ON i.id_categoria_item = ic.id
-                WHERE di.id_doacao = :id_doacao
-            """)
-            result = conexao.execute(query, {"id_doacao": id_doacao}).fetchall()
-            conexao.close()
-            return result
-        return None
-
-    def get_total_donated_by_category(self):
-        """Consulta complexa com JOIN e GROUP BY para relatório de categorias"""
-        conexao = self.database.connect()
-        if conexao:
-            query = text("""
-                SELECT ic.nome_categoria, SUM(di.quantidade_utilizada) as total
-                FROM doacoes_item di
-                JOIN itens i ON di.id_item = i.id
-                JOIN itens_categoria ic ON i.id_categoria_item = ic.id
-                GROUP BY ic.nome_categoria
-            """)
-            result = conexao.execute(query).fetchall()
-            conexao.close()
-            return result
-        return None
-        
+            return "Item de doação cadastrado"
+        else:
+            return "Não foi possível conectar"
+    
     def read(self, id):
-        '''
-        Recebe o ID de um item de doação e retorna um objeto com seus dados
-        '''
-        conexao = self.database.connect() # Estabelecendo conexão
-        if conexao: # Se a conexão existir
-            try: # Tratamento de erro
-                query = text ("""SELECT * FROM doacoes_item WHERE id = :id""") # Query - Pegando os dados do item de doação com esse ID
-                tupla = conexao.execute(query, {"id" : id}).first() # Executando a query e pegando o resultado
-                if not tupla: # Se a tupla não for encontrada
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text ("""SELECT * FROM doacoes_item WHERE id = :id""")
+                tupla = conexao.execute(query, {"id" : id}).first()
+                if not tupla:
                     print("Dados não encontrados.")
-                    raise FileNotFoundError # Tratamento de erro
+                    raise FileNotFoundError
                 else:
-                    doacao_item_objeto = DoacaoItem(tupla[1], tupla[2], tupla[3], tupla[0]) # Transformando a tupla em objeto
-            except Exception as erro: # Tratamento de erro
+                    item_objeto = {"id": tupla[0], "id_doacao": tupla[1], "id_item": tupla[2], "quantidade_utilizada": tupla[3]}
+            except Exception as erro:
                 print(f"Não foi possível realizar a consulta.")
-                return None
-            return doacao_item_objeto
-        else: # A conexão não existiu
+                return "Não foi possível realizar a consulta"
+            return item_objeto
+        else:
             return "Não foi possível conectar"
 
-    def update(self, id, nome_atributo, atributo_update):
-        '''
-        Recebe o ID de um item de doação, o nome do atributo e o atributo atualizado e atualiza o atributo
-        '''
-        conexao = self.database.connect() # Estabelecendo a conexão
-        if conexao: # Se a conexão existir
+    def update(self, id, doacao_item):
+        conexao = self.database.connect()
+        if conexao:
             try:
-                query = text (f'''UPDATE doacoes_item
-                        SET {nome_atributo} = :atributo_update
-                        WHERE id = :id''') # query
+                query = text ('''UPDATE doacoes_item
+                        SET id_doacao = :id_doacao, id_item = :id_item, quantidade_utilizada = :quantidade_utilizada
+                        WHERE id = :id''')
                 conexao.execute (query, 
                                  {
-                                "atributo_update": atributo_update,
+                                "id_doacao": doacao_item.id_doacao,
+                                "id_item": doacao_item.id_item,
+                                "quantidade_utilizada": doacao_item.quantidade_utilizada,
                                 "id": id })
                 conexao.commit()
                 conexao.close()
                 return "Atributo atualizado"
-            except Exception as erro: # Tratamento de erro
+            except Exception as erro:
                 print(f"Não foi possível realizar a consulta.")
-                return None
+                return "Não foi possível atualizar"
         else:
             return "Não foi possível conectar"
+
+    def delete(self, id):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("DELETE FROM doacoes_item WHERE id = :id")
+                conexao.execute(query, {"id": id})
+                conexao.commit()
+                conexao.close()
+                return "Item de doação deletado"
+            except Exception as erro:
+                print(f"Não foi possível realizar a exclusão.")
+                return "Não foi possível deletar"
+        else:
+            return "Não foi possível conectar"
+
+    def get_all(self):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("SELECT * FROM doacoes_item")
+                resultados = conexao.execute(query).fetchall()
+                return [{"id": tupla[0], "id_doacao": tupla[1], "id_item": tupla[2], "quantidade_utilizada": tupla[3]} for tupla in resultados]
+            except Exception as erro:
+                print(f"Não foi possível listar.")
+                return []
+            finally:
+                conexao.close()
+        return []
+
+    def get_items_by_doacao_details(self, id_doacao):
+        conexao = self.database.connect()
+        if conexao:
+            try:
+                query = text("SELECT * FROM doacoes_item WHERE id_doacao = :id_doacao")
+                resultados = conexao.execute(query, {"id_doacao": id_doacao}).fetchall()
+                return [{"id": tupla[0], "id_doacao": tupla[1], "id_item": tupla[2], "quantidade_utilizada": tupla[3]} for tupla in resultados]
+            except Exception as erro:
+                return []
+            finally:
+                conexao.close()
+        return []
+
+    def get_total_donated_by_category(self):
+        return []
 
     def inactivate(self):
         pass
