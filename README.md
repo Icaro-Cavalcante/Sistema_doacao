@@ -10,8 +10,6 @@ Este projeto implementa um Sistema de Doação abrangente, desenvolvido em Pytho
 - [Configuração e Instalação](#configuração-e-instalação)
 - [Povoamento de Dados de Teste](#povoamento-de-dados-de-teste)
 - [Como Executar](#como-executar)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
 
 ## Funcionalidades
 
